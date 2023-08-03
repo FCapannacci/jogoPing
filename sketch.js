@@ -63,10 +63,12 @@ function draw() {
   if (ball.x - ballSize / 2 < 0) {
     // Gol do computador
     computerScore++;
+    atualizarPlacar();
     resetBall();
   } else if (ball.x + ballSize / 2 > width) {
     // Gol do jogador
     playerScore++;
+    atualizarPlacar();
     resetBall();
   }
 
@@ -117,26 +119,27 @@ function resetBall() {
   ballSpeedX = 5;
   ballSpeedY = 0;
 }
-// Colisão com a raquete do jogador
-if (ball.x - ballSize / 2 < playerPaddle.x + paddleWidth &&
-    ball.y > playerPaddle.y &&
-    ball.y < playerPaddle.y + paddleHeight) {
-  // Calcular o ângulo de reflexão da bola após colidir com a raquete do jogador
-  const relativeIntersectY = playerPaddle.y + paddleHeight / 2 - ball.y;
-  const normalizedRelativeIntersectionY = relativeIntersectY / (paddleHeight / 2);
-  const bounceAngle = normalizedRelativeIntersectionY * PI / 4; // Ângulo máximo de 45 graus
-  ballSpeedX = ballSpeedX * cos(bounceAngle) * -1;
-  ballSpeedY = ballSpeedX * sin(bounceAngle);
-}
 
-// Colisão com a raquete do computador
-if (ball.x + ballSize / 2 > computerPaddle.x &&
-    ball.y > computerPaddle.y &&
-    ball.y < computerPaddle.y + paddleHeight) {
-  // Calcular o ângulo de reflexão da bola após colidir com a raquete do computador
-  const relativeIntersectY = computerPaddle.y + paddleHeight / 2 - ball.y;
-  const normalizedRelativeIntersectionY = relativeIntersectY / (paddleHeight / 2);
-  const bounceAngle = normalizedRelativeIntersectionY * PI / 4; // Ângulo máximo de 45 graus
-  ballSpeedX = ballSpeedX * cos(bounceAngle);
-  ballSpeedY = ballSpeedX * sin(bounceAngle);
+// Função para atualizar o placar e narrar o resultado
+// Função para atualizar o placar e narrar o resultado
+function atualizarPlacar() {
+  const placarElement = document.getElementById("placar");
+  placarElement.textContent = `${playerScore} a ${computerScore}`;
+
+  // Verifica se a API Text-to-Speech é suportada no navegador
+  if ('speechSynthesis' in window) {
+    const mensagem = new SpeechSynthesisUtterance(`${playerScore} a ${computerScore}`);
+
+    // Encontrar a voz feminina em português do Brasil
+    const voices = speechSynthesis.getVoices();
+    const voice = voices.find(v => v.lang === 'pt-BR' && v.name.includes('female'));
+
+    if (voice) {
+      mensagem.voice = voice;
+    } else {
+      console.warn('Voz feminina em português do Brasil não encontrada. Usando a voz padrão.');
+    }
+
+    speechSynthesis.speak(mensagem);
+  }
 }
